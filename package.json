@@ -1,0 +1,16 @@
+{
+  "name": "lambda-anguage",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/matt-tingen/lambda-anguage.git",
+  "author": "Matt Tingen <matt.tingen@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "ava",
+    "test:watch": "yarn test -- --watch"
+  },
+  "dependencies": {
+    "ava": "^0.18.2",
+    "sinon": "^1.17.7"
+  }
+}
