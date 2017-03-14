@@ -44,10 +44,6 @@ const CharacterStream = require('./CharacterStream.js');
   test(testTokenization, `"123 abc"`, 'str', `123 abc`);
   test(testTokenization, `"'"`, 'str', `'`);
   test(testTokenization, `" "`, 'str', ` `);
-  test.skip('Identifies escaped quotes', testTokenization, `"\\"test\\"`, 'str', `"test"`);
-  test.skip('Identifies new line string', testTokenization, `"\\n"`, 'str', `\n`);
-  test.skip('Identifies escaped slash', testTokenization, `"\\\\"`, 'str', `\\`);
-
 
   test(testTokenization, 'λ', 'kw', 'lambda');
   test(testTokenization, 'lambda', 'kw');
@@ -74,14 +70,26 @@ const CharacterStream = require('./CharacterStream.js');
   test(testTokenization, '/', 'op');
   test(testTokenization, '*', 'op');
 
-// Skips
+// String Escapes
+  test('Identifies new line', testTokenization, `"\\n"`, 'str', `\n`);
+  test('Identifies carriage return', testTokenization, `"\\r"`, 'str', `\r`);
+  test('Identifies tab', testTokenization, `"\\t"`, 'str', `\t`);
+  test('Identifies backspace', testTokenization, `"\\b"`, 'str', `\b`);
+  test('Identifies form feed', testTokenization, `"\\f"`, 'str', `\f`);
+  test('Identifies vertical tab', testTokenization, `"\\v"`, 'str', `\v`);
+  test('Identifies null char', testTokenization, `"\\0"`, 'str', `\0`);
+  test('Identifies escaped quote', testTokenization, `"\\""`, 'str', `"`);
+  test('Identifies escaped slash', testTokenization, `"\\\\"`, 'str', `\\`);
+  test('Allows escaping of non-escape character', testTokenization, `"\\h"`, 'str', `h`);
+  test('Identifies multiple escaped quotes', testTokenization, `"\\"test\\""`, 'str', `"test"`);
+
+// Whitespace
   test('skips spaces at beginning', testTokenization, '  5', 'num', 5);
   test('skips lf at beginning', testTokenization, '\n\n5', 'num', 5);
   test('skips crlf at beginning', testTokenization, '\r\n\r\n5', 'num', 5);
   test('skips spaces at end', testTokenization, '5  ', 'num', 5);
   test('skips lf at end', testTokenization, '5\n\n', 'num', 5);
   test('skips crlf at end', testTokenization, '5\r\n\r\n', 'num', 5);
-  
   test('is eof on empty input', t => {
     const tokens = tokenStreamFromString('');
     t.true(tokens.eof());
@@ -90,7 +98,8 @@ const CharacterStream = require('./CharacterStream.js');
     const tokens = tokenStreamFromString('\r\n\r\n');
     t.true(tokens.eof());
   });
-
+  
+// Comments
   test('is eof after only a comment', t => {
     const tokens = tokenStreamFromString('# comment');
     t.true(tokens.eof());

@@ -11,6 +11,7 @@ class TokenStream {
     this.identifier = /\w/;
     this.comment = '#';
     this.quote = '"';
+    this.escape = '\\';
     this.punctuation = [
       '{',
       '}',
@@ -36,6 +37,16 @@ class TokenStream {
       '<',
       '>',
     ];
+
+    this.escaped = {
+      n: '\n',
+      r: '\r',
+      t: '\t',
+      b: '\b',
+      f: '\f',
+      v: '\v',
+      '0': '\0',
+    };
 
     this.dawgs = {
       keywords: new Dawg(this.keywords),
@@ -103,13 +114,30 @@ class TokenStream {
     this.croak(message);
   }
 
+  getFromEscapedChar(escaped) {
+    return this.escaped[escaped] || escaped;
+  }
+
   checkString() {
     if (this.chars.peek() === this.quote) {
-      // TODO: escape sequences
       this.chars.next(); // Consume opening quote.
       const buffer = [];
-      while (this.chars.peek() !== this.quote) {
-        buffer.push(this.chars.next());
+      let escapeNext = false;
+      while (escapeNext || this.chars.peek() !== this.quote) {
+        const raw = this.chars.next();
+        let char;
+        if (escapeNext) {
+          char = this.getFromEscapedChar(raw);
+          escapeNext = false;
+        } else if (raw === this.escape) {
+          char = null;
+          escapeNext = true;
+        } else {
+          char = raw;
+        }
+        if (char) {
+          buffer.push(char);
+        }
       }
       this.chars.next(); // Consume closing quote.
       return this.tokenFromBuffer(buffer, 'str');
